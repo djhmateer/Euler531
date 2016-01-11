@@ -11,12 +11,12 @@ namespace p_531
     {
         static void Main(string[] args)
         {
-
+            Console.WriteLine(totientOf(102));
 
 
         }
 
-        public long totientOf(int n)
+        public static long totientOf(int n)
         {
             List<Factor> factors = primeFactors(n);
             List<long> phiSegments = new List<long>();
@@ -26,8 +26,9 @@ namespace p_531
                 //count how many of those factors are in the list
 
                 //record how many and then remove the duplicates. raise factor to power of the count
-                
-                phiSegments.Add((Math.Pow(factor.Number,factor.Occurance) )* (1 - (1 / factor.Number)));
+                long pk = (long)Math.Pow(factor.Number, factor.Occurance);             
+                long pBracket = 1 - (ONE / factor.Number);
+                phiSegments.Add(pk*pBracket);
             }
             foreach (long phiSegment in phiSegments)
             {
@@ -37,8 +38,9 @@ namespace p_531
             return totient;
         }
 
-        public List<Factor> primeFactors(long number)
+        public static List<Factor> primeFactors(long number)
         {
+            long origNumber = number;
             while (true)
             {      
                 start:                
@@ -53,8 +55,7 @@ namespace p_531
                 while (number % 2 == 0)
                 {
                     factorsOfTwo++;
-                    number = number / 2;
-                    Console.WriteLine(2);
+                    number = number / 2;                    
                 }
                 if(factorsOfTwo != 0) factors.Add(new Factor(2, factorsOfTwo));
 
@@ -63,18 +64,18 @@ namespace p_531
                     int factorOccurance = 0;
                     while (number % j == 0)
                     {
-                        factors.Add(j);
-                        number = number / j;
-                        Console.WriteLine(j);
+                        factorOccurance++;
+                        number = number / j;                        
                     }
                     if(factorOccurance != 0) factors.Add(new Factor(j, factorOccurance));
                 }
                 long result = 1;
                 foreach (var factor in factors)
                 {
-                    result = result* factor.Number*factor.Occurance;
+                    result = result* (long)Math.Pow(factor.Number,factor.Occurance);                   
                 }
-                if(result == number) {                     
+               
+                if (result == origNumber) {                     
                     return factors;
                 }
                 else
