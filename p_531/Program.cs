@@ -1,32 +1,37 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
+using Xunit;
 
 
 namespace p_531
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        //public static List<TotientPair> listOfTotients
+        //{
+        //    get; set;
+        //}
+
+        public static void Main(string[] args)
         {
-            DateTime start = DateTime.Now;
-            long sumOfSolution = 0;
             List<TotientPair> listOfTotients = new List<TotientPair>();
+            DateTime start = DateTime.Now;
+            long sumOfSolution = 0;           
             for (long i = 1000000; i < 1005000; i++)
             {
                 listOfTotients.Add(new TotientPair(i));
             }
             for (int n = 0; n < 4999; n++)
             {
-                for (int m = n+1; m < 5000; m++)
+                //Console.WriteLine(n);
+                for (int m = n + 1; m < 5000; m++)
                 {
-                    if (listOfTotients[n].Totient % listOfTotients[n].Number == listOfTotients[m].Totient % listOfTotients[m].Number)
+                    long gFuncResult = GFunc(listOfTotients[n], listOfTotients[m]);
+                    if (gFuncResult != 0)
                     {
-                        sumOfSolution = sumOfSolution + ((listOfTotients[n].Totient % listOfTotients[n].Number));
-                        Console.WriteLine(listOfTotients[n].Totient % listOfTotients[n].Number + " n=" + listOfTotients[n].Number+ " m=" + listOfTotients[n].Number);
+                        sumOfSolution = sumOfSolution + gFuncResult;
+                       // Console.WriteLine(gFuncResult + " n=" + listOfTotients[n].Number + " m=" + listOfTotients[n].Number);
                     }
                 }
             }
@@ -34,11 +39,74 @@ namespace p_531
             Console.WriteLine(sumOfSolution + "!!!" + (end - start).TotalMinutes);
         }
 
-        
+        public static long GFunc(TotientPair n, TotientPair m)
+        {
+            long dmNdivisor = m.Number;
+            long dmN = m.Number % n.Number;
+            long ntmt = n.Totient - m.Totient;
+            
+            while (ntmt < 0)
+            {
+                ntmt = ntmt + n.Number;
+            }
+            if(dmN != 1)
+            {
+                if (!(m.Number % dmN == 0)) return 0;
+                else {
+                    dmNdivisor = m.Number / dmN;
+                }
+            }
+            //Console.WriteLine("  m.N=" + m.Number + "   m.T=" + m.Totient + "  dmNdiv =" + dmNdivisor + "   ntmt=" + ntmt + "  n.N=" + n.Number + "  n.T=" + n.Totient + "Gfunc Returns: " + (m.Totient + dmNdivisor * ntmt) % (dmNdivisor * n.Number));
+            return (m.Totient + dmNdivisor * ntmt) % (dmNdivisor * n.Number);
+            
 
-        
+        }
+
+        [Fact]
+        public void Givenexample_GfuncShouldReturn10()
+        {
+            TotientPair TwoFour = new TotientPair(1);
+            TwoFour.Number = 4;
+            TwoFour.Totient = 2;
+            TotientPair FourSix = new TotientPair(1);
+            FourSix.Number = 6;
+            FourSix.Totient = 4;
+            long result = GFunc(TwoFour,FourSix);
+            Assert.Equal(10, result);
+        }
+
+
+        [Fact]
+        public void Given456547347_TotientShouldReturn301961520()
+        {
+            long result = TotientPair.totientOf(456547347);
+            Assert.Equal(301961520, result);
+        }
+
+        [Fact]
+        public void Given306765572_TotientShouldReturn153382784()
+        {
+            long result = TotientPair.totientOf(30676556672);
+            Assert.Equal(15334681600, result);
+        }
+
+        [Fact]
+        public void Given6453_PrimeFactorsShouldReturn3and239()
+        {
+            List<Factor> expected = new List<Factor>();
+            expected.Add(new Factor(3, 3));
+            expected.Add(new Factor(239, 1));
+            List<Factor> result = TotientPair.primeFactors(6453);
+            Assert.Equal(expected[0].Number, result[0].Number);
+            Assert.Equal(expected[0].Occurance, result[0].Occurance);
+            Assert.Equal(expected[1].Number, result[1].Number);
+            Assert.Equal(expected[1].Occurance, result[1].Occurance);
+        }
+
+       
+
     }
-    class Factor
+    public class Factor
     {
         public long Number { get; set; }
 
@@ -48,9 +116,9 @@ namespace p_531
         {
             Number = number;
             Occurance = occurance;
-        }       
+        }
     }
-    class TotientPair
+   public class TotientPair
     {
         public long Number { get; set; }
 
@@ -132,8 +200,8 @@ namespace p_531
                 }
             }
         }
+        
 
-       
     }
 
 }
