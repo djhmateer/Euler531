@@ -2,64 +2,58 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
+using System.Numerics;
 
 
 namespace p_531
 {
     public class Program
     {
-        //public static List<TotientPair> listOfTotients
-        //{
-        //    get; set;
-        //}
-
         public static void Main(string[] args)
         {
             List<TotientPair> listOfTotients = new List<TotientPair>();
             DateTime start = DateTime.Now;
-            long sumOfSolution = 0;           
+            BigInteger sumOfSolution = 0;           
             for (long i = 1000000; i < 1005000; i++)
             {
                 listOfTotients.Add(new TotientPair(i));
             }
             for (int n = 0; n < 4999; n++)
             {
-                //Console.WriteLine(n);
                 for (int m = n + 1; m < 5000; m++)
                 {
                     long gFuncResult = GFunc(listOfTotients[n], listOfTotients[m]);
                     if (gFuncResult != 0)
                     {
-                        sumOfSolution = sumOfSolution + gFuncResult;
-                       // Console.WriteLine(gFuncResult + " n=" + listOfTotients[n].Number + " m=" + listOfTotients[n].Number);
+                        sumOfSolution = sumOfSolution + gFuncResult;                       
                     }
                 }
             }
             DateTime end = DateTime.Now;
-            Console.WriteLine(sumOfSolution + "!!!" + (end - start).TotalMinutes);
+           Console.WriteLine(sumOfSolution + "!!!    Total Milliseconds:" + (end - start).TotalMilliseconds);
         }
 
         public static long GFunc(TotientPair n, TotientPair m)
         {
             long dmNdivisor = m.Number;
             long dmN = m.Number % n.Number;
-            long ntmt = n.Totient - m.Totient;
+            long ntmt = (n.Totient - m.Totient);
             
             while (ntmt < 0)
             {
                 ntmt = ntmt + n.Number;
             }
-            if(dmN != 1)
+            ntmt = ntmt % n.Number;
+            if (dmN != 1)
             {
-                if (!(m.Number % dmN == 0)) return 0;
-                else {
+                if (!(m.Number % dmN == 0)) {  return 0;}
+                else
+                {
                     dmNdivisor = m.Number / dmN;
                 }
             }
-            //Console.WriteLine("  m.N=" + m.Number + "   m.T=" + m.Totient + "  dmNdiv =" + dmNdivisor + "   ntmt=" + ntmt + "  n.N=" + n.Number + "  n.T=" + n.Totient + "Gfunc Returns: " + (m.Totient + dmNdivisor * ntmt) % (dmNdivisor * n.Number));
+         // Console.WriteLine("  m.N=" + m.Number + "   m.T=" + m.Totient + "  dmNdiv =" + dmNdivisor + "   ntmt=" + ntmt + "  n.N=" + n.Number + "  n.T=" + n.Totient + "  Gfunc Returns: " + (m.Totient + dmNdivisor * ntmt) % (dmNdivisor * n.Number));
             return (m.Totient + dmNdivisor * ntmt) % (dmNdivisor * n.Number);
-            
-
         }
 
         [Fact]
@@ -74,8 +68,7 @@ namespace p_531
             long result = GFunc(TwoFour,FourSix);
             Assert.Equal(10, result);
         }
-
-
+        
         [Fact]
         public void Given456547347_TotientShouldReturn301961520()
         {
@@ -91,6 +84,13 @@ namespace p_531
         }
 
         [Fact]
+        public void GivenPrime3_TotientShouldReturn2()
+        {
+            long result = TotientPair.totientOf(3);
+            Assert.Equal(2, result);
+        }
+
+        [Fact]
         public void Given6453_PrimeFactorsShouldReturn3and239()
         {
             List<Factor> expected = new List<Factor>();
@@ -103,8 +103,25 @@ namespace p_531
             Assert.Equal(expected[1].Occurance, result[1].Occurance);
         }
 
-       
+        [Fact]
+        public void Given1_PrimeFactorsShouldReturn1()
+        {
+            List<Factor> expected = new List<Factor>();
+            expected.Add(new Factor(1, 1));
+            List<Factor> result = TotientPair.primeFactors(1);
+            Assert.Equal(expected[0].Number, result[0].Number);
+            Assert.Equal(expected[0].Occurance, result[0].Occurance);
+        }
 
+        [Fact]
+        public void Given3_PrimeFactorsShouldReturn1and3()
+        {
+            List<Factor> expected = new List<Factor>();
+            expected.Add(new Factor(3, 1));                
+            List<Factor> result = TotientPair.primeFactors(3);
+            Assert.Equal(expected[0].Number, result[0].Number);
+            Assert.Equal(expected[0].Occurance, result[0].Occurance);
+        }
     }
     public class Factor
     {
@@ -137,9 +154,6 @@ namespace p_531
             long totient = 1;
             foreach (Factor factor in factors)
             {
-                //count how many of those factors are in the list
-
-                //record how many and then remove the duplicates. raise factor to power of the count
                 long pk = (long)Math.Pow(factor.Number, factor.Occurance);
                 float pBracket = 1 - (1 / (float)factor.Number);
                 phiSegments.Add(pk * pBracket);
@@ -155,29 +169,26 @@ namespace p_531
         public static List<Factor> primeFactors(long number)
         {
             long origNumber = number;
-            while (true)
+            while (number != 0)
             {
-                start:
-
                 var factors = new List<Factor>();
 
-                if (number == 0)
-                {
-                    goto start;
-                }
                 int factorsOfTwo = 0;
                 while (number % 2 == 0)
                 {
                     factorsOfTwo++;
                     number = number / 2;
                 }
-                if (factorsOfTwo != 0) factors.Add(new Factor(2, factorsOfTwo));
+                if (factorsOfTwo != 0)
+                {
+                    factors.Add(new Factor(2, factorsOfTwo));
+                }
 
                 for (long j = 3; j <= number; j += 2)
                 {
                     int factorOccurance = 0;
                     while (number % j == 0)
-                    {
+                    { 
                         factorOccurance++;
                         number = number / j;
                     }
@@ -188,7 +199,10 @@ namespace p_531
                 {
                     result = result * (long)Math.Pow(factor.Number, factor.Occurance);
                 }
-
+                if(origNumber == 1)
+                {
+                    factors.Add(new Factor(1, 1));
+                }
                 if (result == origNumber)
                 {
                     return factors;
@@ -199,9 +213,7 @@ namespace p_531
                     Console.WriteLine();
                 }
             }
+            return null;
         }
-        
-
     }
-
 }
