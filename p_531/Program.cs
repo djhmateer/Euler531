@@ -9,6 +9,7 @@ namespace p_531
 {
     public class Program
     {
+        //--------------------https://projecteuler.net/problem=531----------------------------
         public static void Main(string[] args)
         {
             List<TotientPair> listOfTotients = new List<TotientPair>();
